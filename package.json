@@ -6,6 +6,7 @@
   "scripts": {
     "dev:discord": "nodemon src/discord.js",
     "dev:server": "nodemon src/server.js",
+    "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Huarlen Souza",
