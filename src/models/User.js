@@ -1,20 +1,112 @@
 import Database from '../lib/Database'
 
 export default {
-    register: async(value) => {
-        return new Promise(async(resolve, reject) => {
+    getUser: async(id_discord, email) => {
+        return new Promise((resolve, reject) => {
             Database.connect( err => {
-                if (err) throw err;
-                Database.query('SELECT * FROM aeternum.cadastro WHERE email = (?) AND id_championship = (SELECT id FROM aeternum.campeonato WHERE ativo = 1)', [value], async(err, registro) => {
-                    if (err) throw err;
-    
-                    if(registro.length > 0) {
-                        return resolve(true)
-                    }
+                if (err) {
+                    console.log(err);
+                    return reject(err);
+                };
+                
+                Database.query('SELECT nickname, email, days, hours, id_discord, verified FROM members WHERE id_discord = (?) AND email = (?)', [id_discord, email], async(err, user) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
 
-                    return resolve(false);
+                    return resolve(user);
                 });
             });
+        });
+    },
+    setUser: async(data) => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.connect( err => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+    
+                    Database.query(`
+                        INSERT INTO members (nickname, email, days, hours, id_discord, access_token)
+                        VALUES (?)
+                    `, [
+                            [
+                                data.nickname,
+                                data.email,
+                                data.days,
+                                data.hour,
+                                data.id_discord,
+                                data.access_token
+                            ]
+                        ], async(err) => {
+                        if (err) {
+                            console.log(err);
+                            return reject(err);
+                        };
+    
+                        return resolve(true);
+                    });
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
+    },
+    isUser: async(id_discord, email) => {
+        return new Promise((resolve, reject) => {
+            Database.connect( err => {
+                if (err) {
+                    console.log(err);
+                    return reject(err);
+                };
+                
+                Database.query('SELECT COUNT(id) AS "boolean" FROM members WHERE id_discord = (?) AND email = (?)', [id_discord, email], async(err, user) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(user[0].boolean > 0 ? false : true);
+                });
+            });
+        });
+    },
+    updateUser: async(data) => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.connect( err => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+    
+                    Database.query(`
+                        UPDATE members SET nickname = (?), days = (?), hours = (?), access_token = (?), updated_at = NOW()
+                        WHERE id_discord = (?) AND email = (?)
+                    `, [
+                            
+                            data.nickname,
+                            data.days,
+                            data.hour,
+                            data.access_token,
+                            data.id_discord,
+                            data.email
+                        
+                        ], async(err) => {
+                        if (err) {
+                            console.log(err);
+                            return reject(err);
+                        };
+    
+                        return resolve(true);
+                    });
+                });
+            } catch(e) {
+                return reject(e);
+            };
         });
     }
 };

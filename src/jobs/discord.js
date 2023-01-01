@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 
 export default {
-    run: () => {
+    run: async() => {
         const client = new Client({
             intents: [
                 GatewayIntentBits.Guilds,
@@ -20,14 +20,12 @@ export default {
             ]
         });
         
-        client.on('ready', () => {
-            console.log(`Logged in as ${client.user.tag}!`);
+        client.on('ready', async() => {
+            console.log(`O Aeternum bot foi iniciado com sucesso! - ${client.user.tag}!`);
         });
-        
-        // client.on('guildMemberAdd', response => {
-        //     response.roles.add(process.env.ID_ROLE)
-        // });
-        
-        client.login(process.env.ID_BOT);
+ 
+        client.login(process.env.ID_DISCORD_BOT);
+
+        return client;
     }
-}
+};

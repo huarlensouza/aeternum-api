@@ -2,24 +2,16 @@ import 'dotenv/config'
 import express from 'express';
 import cors from 'cors';
 import routes from './routes/index'
-import { body, validationResult } from 'express-validator';
-import User from './models/User';
+import { body } from 'express-validator';
 import discord from './jobs/discord';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin:['http://177.209.229.53:3000']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(require("express-session")({
-    secret: "aeternumsecret",
-    cookie: {
-        maxAge: 86400000,
-    }, 
-    resave: true,
-    saveUninitialized: false
-}));
 
 app.use('/api',
     [
@@ -29,15 +21,7 @@ app.use('/api',
         body('email').custom(async value => {
             if(!value) {
                 return Promise.reject('E-mail é obrigatório');
-            }
-
-            return User.register(value).then(response => {
-                if(response) {
-                    return Promise.reject('E-mail já cadastrado');
-                }
-
-                return true;
-            });
+            };
         }),
         body('weapon_primary').custom(async value => {
             const armas = [
@@ -56,11 +40,9 @@ app.use('/api',
                 'Manopla de Gelo',
                 'Manopla Imaterial'
             ];
-
             if(!armas.includes(value)) {
                 return Promise.reject('Arma primária inválida');
             };
-
             return true;
         }),
         body('weapon_secondary').custom(async value => {
@@ -80,20 +62,16 @@ app.use('/api',
                 'Manopla de Gelo',
                 'Manopla Imaterial'
             ];
-
             if(!armas.includes(value)) {
                 return Promise.reject('Arma secundária inválida');
             };
-
             return true;
         }),
         body('hour').custom(async value => {
             const [horas, minutos] = value.split(':')
-        
             if(horas >= 0 && horas <= 23 && minutos >= 0 && minutos <= 59) {
                 return true;
             };
-
             return Promise.reject('Data ou hora inválida');
         }),
         body('days').custom(async value => {
@@ -106,17 +84,16 @@ app.use('/api',
                 'Sexta-feira',
                 'Sábado'
             ];
-
             if(value.filter(x => !dias.includes(x)).length > 0) {
                 return Promise.reject('Dia inválido');
-            }
-
-            return true
+            };
+            return true;
         })
     ],
+    cors(),
 routes);
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.SERVER_PORT, () => {
     discord.run()
     console.log('Servidor iniciado com sucesso');
 });

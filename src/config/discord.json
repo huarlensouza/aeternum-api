@@ -1,7 +1,0 @@
-{
-    "oauth2": {
-        "redirect_uri": "http://177.209.229.53:3000/cadastrar",
-        "client_id": "1056759160957567077",
-        "scopes": ["identify", "email", "guilds.members.read", "guilds.join"]
-    }
-}
