@@ -8,7 +8,7 @@ import discord from './jobs/discord';
 const app = express();
 
 app.use(cors({
-    origin:['http://177.209.229.53:3000']
+    origin:[process.env.URL_CORS]
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
