@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev:server": "nodemon src/server.js",
-    "build": "yarn sucrase ./src -d ./Dir --transforms imports",
-    "start": "node ./Dir/server.js",
+    "build": "yarn sucrase ./src -d ./dist --transforms imports",
+    "start": "node ./dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Huarlen Souza",
