@@ -39,7 +39,7 @@ export default {
                             console.log(err);
                             return reject(err);
                         };
-                        return resolve(championship[0].id);
+                        return resolve(championship.length > 0 ? championship[0].id : false);
                     });
                 });
             } catch(e) {
