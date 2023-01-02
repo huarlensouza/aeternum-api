@@ -1,6 +1,6 @@
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+"use strict";Object.defineProperty(exports, "__esModule", {value: true});const { Client, GatewayIntentBits, Partials } = require('discord.js');
 
-export default {
+exports. default = {
     run: async() => {
         const client = new Client({
             intents: [
@@ -25,5 +25,7 @@ export default {
         });
  
         client.login(process.env.ID_DISCORD_BOT);
+
+        return client;
     }
 };
