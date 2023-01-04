@@ -90,7 +90,7 @@ export default {
             const championship_year = championship_date.getUTCFullYear();
             const championship_hours = `${championship_date.getHours()}:${('00'+championship_date.getMinutes()).slice(-2)}`;
 
-            const weebhookClient = new Discord.WebhookClient({url:'https://discord.com/api/webhooks/1060283923533414550/kJmC5sb89Be801BJwGEffRLkS6aQqPGtedBRCojFDHYXlyYf2MC-YnvvenQNGiFxMe6o'});
+            const weebhookClient = new Discord.WebhookClient({url:process.env.URL_DISCORD_WEBHOOK});
             const embed = new EmbedBuilder()
             .setAuthor({name:nickname, iconURL: `https://cdn.discordapp.com/avatars/${id_discord}/${avatar}`})
             .setColor(0xEDA73E)
