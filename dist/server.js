@@ -1,13 +1,17 @@
 "use strict"; function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }require('dotenv/config');
 var _express = require('express'); var _express2 = _interopRequireDefault(_express);
-var _cors = require('cors'); var _cors2 = _interopRequireDefault(_cors);
 var _index = require('./routes/index'); var _index2 = _interopRequireDefault(_index);
 var _expressvalidator = require('express-validator');
 var _discord = require('./jobs/discord'); var _discord2 = _interopRequireDefault(_discord);
 
 const app = _express2.default.call(void 0, );
 
-app.use(_cors2.default.call(void 0, ));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.use(_express2.default.json());
 app.use(_express2.default.urlencoded({ extended: true }));
 

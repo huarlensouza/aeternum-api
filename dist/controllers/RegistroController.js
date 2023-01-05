@@ -3,11 +3,14 @@ var _User = require('../models/User'); var _User2 = _interopRequireDefault(_User
 var _Championship = require('../models/Championship'); var _Championship2 = _interopRequireDefault(_Championship);
 var _Enrollments = require('../models/Enrollments'); var _Enrollments2 = _interopRequireDefault(_Enrollments);
 var _token = require('../jobs/token'); var _token2 = _interopRequireDefault(_token);
+var _discordjs = require('discord.js'); var _discordjs2 = _interopRequireDefault(_discordjs);
 
 exports. default = {
     create: async(request, response) => {
         try {
-            const { nickname, id_discord, email, weapon_primary, weapon_secondary, hour, days, access_token } = request.body;
+            const month = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+            const { nickname, id_discord, email, weapon_primary, weapon_secondary, hour, days, access_token, avatar } = request.body;
 
             const errors = _expressvalidator.validationResult.call(void 0, request);
             if (!errors.isEmpty()) {
@@ -79,6 +82,30 @@ exports. default = {
                     weapon_secondary: weapon_secondary
                 });
             };
+
+            const championship = await _Championship2.default.getOpen();
+            const championship_date = new Date(championship.date)
+            const championship_day = ('00'+championship_date.getDate()).slice(-2);
+            const championship_month = month[championship_date.getMonth()];
+            const championship_year = championship_date.getUTCFullYear();
+            const championship_hours = `${championship_date.getHours()}:${('00'+championship_date.getMinutes()).slice(-2)}`;
+
+            const weebhookClient = new _discordjs2.default.WebhookClient({url:process.env.URL_DISCORD_WEBHOOK});
+            const embed = new (0, _discordjs.EmbedBuilder)()
+            .setAuthor({name:nickname, iconURL: `https://cdn.discordapp.com/avatars/${id_discord}/${avatar}`})
+            .setColor(0xEDA73E)
+            .addFields(
+                { name: `Campeonato - ${championship.description}`, value: `${championship_day} de ${championship_month} de ${championship_year} às ${championship_hours}` },
+                { name: 'Arma primária', value: weapon_primary, inline: true },
+                { name: 'Arma secundária', value: weapon_secondary, inline: true },
+            )
+            .setTimestamp()
+            
+            weebhookClient.send({
+                username: `Competidor: `,
+                content: `<@${id_discord}>`,
+                embeds: [embed],
+            })
 
             return response.status(200).send({enrollment:true});
         } catch(e) {

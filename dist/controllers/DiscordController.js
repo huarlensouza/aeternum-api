@@ -14,7 +14,6 @@ exports. default = {
     post: async(request, response) => {
         try {
             const { code } = request.body;
-            console.log(request.body)
             if (!code) return response.status(200).send({auth:false});
             
             const data = new FormData();
@@ -33,7 +32,7 @@ exports. default = {
                 })
             ).json();
     
-            if(auth_discord.error == 'invalid_grant') return response.status(200).send({auth:false});
+            if(auth_discord.error == 'invalid_grant') return response.status(200).send({auth:false, discord:{verified:false}});
     
             //JSON com as informações do Usuário
             const user_discord = await (
@@ -43,7 +42,9 @@ exports. default = {
                     },
                 })
             ).json();
-    
+
+            if(!user_discord.verified) return response.status(200).send({auth:true, discord:{verified:false}});
+            
             //Verifica se existe o usuário
             const user = await _User2.default.getUser(user_discord.id, user_discord.email);
             
