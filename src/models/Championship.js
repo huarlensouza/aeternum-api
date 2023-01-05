@@ -4,20 +4,13 @@ export default {
     getOpen: async() => {
         return new Promise(async(resolve, reject) => {
             try {
-                Database.connect( err => {
+                Database.query('SELECT id, description, register, date FROM championships WHERE register = 1', async(err, championship) => {
                     if (err) {
                         console.log(err);
                         return reject(err);
                     };
 
-                    Database.query('SELECT id, description, register, date FROM championships WHERE register = 1', async(err, championship) => {
-                        if (err) {
-                            console.log(err);
-                            return reject(err);
-                        };
-
-                        return resolve(championship[0]);
-                    });
+                    return resolve(championship[0]);
                 });
             } catch(e) {
                 return reject(e);
@@ -28,19 +21,12 @@ export default {
     getId: async() => {
         return new Promise(async(resolve, reject) => {
             try {
-                Database.connect( err => {
+                Database.query('SELECT id FROM championships WHERE register = 1', async(err, championship) => {
                     if (err) {
                         console.log(err);
                         return reject(err);
                     };
-
-                    Database.query('SELECT id FROM championships WHERE register = 1', async(err, championship) => {
-                        if (err) {
-                            console.log(err);
-                            return reject(err);
-                        };
-                        return resolve(championship.length > 0 ? championship[0].id : false);
-                    });
+                    return resolve(championship.length > 0 ? championship[0].id : false);
                 });
             } catch(e) {
                 return reject(e);
@@ -50,18 +36,12 @@ export default {
     isOpen: async() => {
         return new Promise(async(resolve, reject) => {
             try {
-                Database.connect( err => {
+                Database.query('SELECT COUNT(id) AS "boolean" FROM championships WHERE register = 1', async(err, championship) => {
                     if (err) {
                         console.log(err);
                         return reject(err);
                     };
-                    Database.query('SELECT COUNT(id) AS "boolean" FROM championships WHERE register = 1', async(err, championship) => {
-                        if (err) {
-                            console.log(err);
-                            return reject(err);
-                        };
-                        return resolve(championship[0].boolean > 0 ? true : false);
-                    });
+                    return resolve(championship[0].boolean > 0 ? true : false);
                 });
             } catch(e) {
                 return reject(e);
