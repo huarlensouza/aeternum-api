@@ -158,19 +158,20 @@ export default {
                     };
 
                     await webhookClient.deleteMessage(enrollment[0].id_register);
+                    
+                    Database.query(`
+                        DELETE FROM enrollments
+                        WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
+                    `, [id_discord], async(err) => {
+                        if (err) {
+                            console.log(err);
+                            return reject(err);
+                        };
+    
+                        return resolve(true);
+                    });
                 });
                 
-                Database.query(`
-                    DELETE FROM enrollments
-                    WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
-                `, [id_discord], async(err) => {
-                    if (err) {
-                        console.log(err);
-                        return reject(err);
-                    };
-
-                    return resolve(true);
-                });
             } catch(e) {
                 return reject(e);
             };
