@@ -10,7 +10,7 @@ export default {
                         return reject(err);
                     };
 
-                    return resolve(user[0].id || false);
+                    return resolve(user[0]?.id || false);
                 });
             } catch(e) {
                 return reject(e);
