@@ -6,17 +6,18 @@ import discord from './jobs/discord';
 
 const app = express();
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api',
     [
-        body('nickname').isLength({ min: 5 }).withMessage('O nome do personagem precisa ter pelo menos 5 caracteres'),
+        body('nickname').isLength({ min: 4 }).withMessage('O nome do personagem precisa ter pelo menos 4 caracteres'),
         body('nickname').isLength({ max: 20 }).withMessage('O nome do personagem permite o máximo de 20 caracteres'),
         body('email').isEmail().withMessage('O e-mail precisa ser válido'),
         body('email').custom(async value => {
@@ -91,7 +92,8 @@ app.use('/api',
             return true;
         })
     ],
-routes);
+    routes
+);
 
 app.listen(process.env.SERVER_PORT, () => {
     discord.run();

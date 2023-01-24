@@ -1,7 +1,7 @@
 import User from '../models/User'
 import Championship from '../models/Championship'
-import token from '../jobs/token';
 import Enrollments from '../models/Enrollments';
+import token from '../jobs/token';
 
 export default {
     get: async(request, response) => {
@@ -14,7 +14,7 @@ export default {
     post: async(request, response) => {
         try {
             const { code } = request.body;
-            if (!code) return response.status(200).send({auth:false});
+            if (!code) return response.status(200).send({auth:false, verified:false});
             
             const data = new FormData();
             data.append("client_id", process.env.ID_DISCORD_CLIENT);
@@ -32,7 +32,7 @@ export default {
                 })
             ).json();
     
-            if(auth_discord.error == 'invalid_grant') return response.status(200).send({auth:false, discord:{verified:false}});
+            if(auth_discord.error == 'invalid_grant') return response.status(200).send({auth:false, verified:false});
     
             //JSON com as informações do Usuário
             const user_discord = await (
@@ -43,24 +43,22 @@ export default {
                 })
             ).json();
 
-            if(!user_discord.verified) return response.status(200).send({auth:true, discord:{verified:false}});
+            if(!user_discord.verified) return response.status(200).send({auth:true, verified:false});
             
-            //Verifica se existe o usuário
-            const user = await User.getUser(user_discord.id, user_discord.email);
+            //Buscar usuário
+            const user = await User.getUser(user_discord.id);
             
-            //Verifica se o Campeonato está com as inscrições abertas
-            const championship = await Championship.isOpen();
-            const id_championship = await Championship.getId();
-            const enrollment = await Enrollments.getRegister(user_discord.id, id_championship);
+            //Buscar alistamento
+            const userEnrollment = await Enrollments.getUser(user_discord.id);
     
-            response.send({
+            response.status(200).send({
+                verified:true,
                 auth:true,
                 discord: user_discord,
                 user:user,
-                member: user.length > 0 ? true : false,
-                enrollment: !enrollment,
-                championship: championship,
-                access_token: token.encrypt(auth_discord.access_token)
+                enrollment: userEnrollment,
+                access_token: token.encrypt(auth_discord.access_token),
+                refresh_token: token.encrypt(auth_discord.refresh_token)
             });
         } catch(e) {
             return response.status(200).send({auth:false})

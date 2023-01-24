@@ -1,4 +1,5 @@
 import Database from "../lib/Database";
+import Discord, { EmbedBuilder } from 'discord.js'
 
 export default {
     get: async(id_championship) => {
@@ -32,36 +33,137 @@ export default {
             };
         });
     },
-    getRegister: async(id_discord, id_championship) => {
+    update: async(data) => {
         return new Promise(async(resolve, reject) => {
             try {
-                Database.query('SELECT COUNT(id) AS "boolean" FROM enrollments WHERE id_discord = (?) AND id_championship = (?)', [id_discord, id_championship], async(err, enrollment) => {
+                Database.query(`
+                    UPDATE enrollments SET weapon_primary = (?), weapon_secondary = (?) WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
+                `, 
+                [
+                    data.weapon_primary,
+                    data.weapon_secondary,
+                    data.id_discord,
+                ], async(err) => {
                     if (err) {
                         console.log(err);
                         return reject(err);
                     };
 
-                    return resolve(enrollment[0].boolean > 0 ? false : true);
+                    return resolve(true);
                 });
             } catch(e) {
                 return reject(e);
             };
         });
     },
-    setRegister: async(data) => {
+    getUser: async(id_discord) => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.query('SELECT id_register, weapon_primary, weapon_secondary FROM enrollments WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)', [id_discord], async(err, enrollment) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(enrollment[0] || false);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
+    },
+    hasEnrollment: async(id_discord) => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.query('SELECT id FROM enrollments WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)', [id_discord], async(err, enrollment) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(enrollment[0]?.id || false);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
+    },
+    setEnrollment: async(data) => {
         return new Promise(async(resolve, reject) => {
             try {
                 Database.query(`
-                    INSERT INTO enrollments (id_discord, id_championship, weapon_primary, weapon_secondary)
-                    VALUES (?)
-                `, [
-                        [
-                            data.id_discord,
-                            data.id_championship,
-                            data.weapon_primary,
-                            data.weapon_secondary,
-                        ]
-                    ], async(err) => {
+                    INSERT INTO enrollments (id_discord, id_championship, id_register, weapon_primary, weapon_secondary)
+                    VALUES (?, (SELECT id FROM championships WHERE active = 1), ?, ?, ?)
+                `, 
+                [
+                    data.id_discord,
+                    data.id_register,
+                    data.weapon_primary,
+                    data.weapon_secondary,
+                ], async(err) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(true);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
+    },
+    getChampion: async() => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.query(`
+                    SELECT
+                        members.nickname,
+                        members.id_discord,
+                        members.avatar,
+                        enrollments.weapon_primary,
+                        enrollments.weapon_secondary,
+                        championships.description,
+                        championships.date
+                    FROM members
+                    INNER JOIN enrollments
+                    ON members.id_discord = enrollments.id_discord
+                    INNER JOIN championships
+                    ON championships.id = enrollments.id_championship
+                    WHERE enrollments.id_championship = (SELECT MAX(id) FROM championships WHERE active = 0) AND enrollments.winner = 1
+                `, async(err, champion) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(champion);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
+    },
+    delete: async(id_discord) => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const webhookClient = new Discord.WebhookClient({url:process.env.URL_DISCORD_WEBHOOK});
+                Database.query(`
+                    SELECT id_register FROM enrollments
+                    WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
+                `, [id_discord], async(err, enrollment) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    await webhookClient.deleteMessage(enrollment[0].id_register);
+                });
+                
+                Database.query(`
+                    DELETE FROM enrollments
+                    WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
+                `, [id_discord], async(err) => {
                     if (err) {
                         console.log(err);
                         return reject(err);
@@ -74,4 +176,4 @@ export default {
             };
         });
     }
-}
+};
