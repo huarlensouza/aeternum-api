@@ -130,7 +130,7 @@ export default {
                     ON members.id_discord = enrollments.id_discord
                     INNER JOIN championships
                     ON championships.id = enrollments.id_championship
-                    WHERE enrollments.id_championship = (SELECT MAX(id) FROM championships WHERE active = 0) AND enrollments.winner = 1
+                    WHERE enrollments.id_championship = (SELECT MAX(id_championship) FROM enrollments WHERE winner = 1) AND enrollments.winner = 1
                 `, async(err, champion) => {
                     if (err) {
                         console.log(err);
@@ -158,7 +158,7 @@ export default {
                     };
 
                     await webhookClient.deleteMessage(enrollment[0].id_register);
-                    
+
                     Database.query(`
                         DELETE FROM enrollments
                         WHERE id_discord = (?) AND id_championship = (SELECT id FROM championships WHERE active = 1)
