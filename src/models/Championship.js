@@ -53,21 +53,17 @@ export default {
                 Database.query(`
                     SELECT
                         championships.id,
-                        description,
-                        register,
-                        active,
-                        value,
-                        date,
-                        (SELECT nickname FROM members WHERE id_discord = enrollments.id_discord) AS nickname,
-                        id_discord,
-                        weapon_primary,
-                        weapon_secondary,
-                        (SELECT avatar FROM members WHERE id_discord = enrollments.id_discord) AS avatar,
-                        link
+                        championships.description,
+                        championships.register,
+                        championships.active,
+                        championships.value,
+                        championships.date,
+                        (SELECT id_discord FROM enrollments WHERE winner = 1 AND id_championship = championships.id) AS id_discord_champion,
+                        (SELECT nickname FROM members WHERE members.id_discord = id_discord_champion) AS nickname,
+                        (SELECT weapon_primary FROM enrollments WHERE winner = 1 AND id_championship = championships.id) AS weapon_primary,
+                        (SELECT weapon_secondary FROM enrollments WHERE winner = 1 AND id_championship = championships.id) AS weapon_secondary,
+                        championships.link
                     FROM championships
-                    LEFT JOIN enrollments
-                    ON championships.id = enrollments.id_championship
-                    WHERE enrollments.winner = 1 OR enrollments.winner IS NULL
                     ORDER BY championships.id DESC
                 `, async(err, championships) => {
                     if (err) {
