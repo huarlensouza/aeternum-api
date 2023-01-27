@@ -9,7 +9,6 @@ import ChampionshipController from '../controllers/ChampionshipController';
 
 const routes = express.Router();
 
-routes.get('/championship', ChampionshipController.get);
 
 routes.get("/auth/discord", DiscordController.get);
 routes.post("/auth/discord", DiscordController.post);
@@ -17,6 +16,10 @@ routes.post("/auth/discord", DiscordController.post);
 routes.get("/ranking", RankingController.get);
 routes.post("/ranking-individual", RankingController.getRankingIndividual);
 routes.get("/last-champion", ChampionController.get);
+
+routes.get('/championship', ChampionshipController.get);
+routes.post('/championships', ChampionshipController.getChampionships)
+routes.post('/duels-championship', ChampionshipController.getDuels);
 
 routes.post('/formulario', RegistroController.create);
 

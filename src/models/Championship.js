@@ -1,4 +1,4 @@
-import Database from "../lib/Database"
+import Database from '../lib/Database';
 
 export default {
     getOpen: async() => {
@@ -46,5 +46,39 @@ export default {
                 return reject(e);
             };
         });
+    },
+    getAll: async() => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.query(`
+                    SELECT
+                        championships.id,
+                        description,
+                        register,
+                        active,
+                        value,
+                        date,
+                        (SELECT nickname FROM members WHERE id_discord = enrollments.id_discord) AS nickname,
+                        id_discord,
+                        weapon_primary,
+                        weapon_secondary,
+                        (SELECT avatar FROM members WHERE id_discord = enrollments.id_discord) AS avatar,
+                        link
+                    FROM championships
+                    LEFT JOIN enrollments
+                    ON championships.id = enrollments.id_championship
+                    WHERE enrollments.winner = 1 OR enrollments.winner IS NULL
+                    ORDER BY championships.id DESC
+                `, async(err, championships) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+                    return resolve(championships);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
     }
-}
+};

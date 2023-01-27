@@ -36,6 +36,6 @@ export default {
         } catch(e) {
             console.log(e);
             return response.status(500).send({message: e});
-        }
+        };
     }
-}
+};

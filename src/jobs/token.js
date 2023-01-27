@@ -14,4 +14,4 @@ export default {
         decrypted = Buffer.concat([decrypted, decipher.final()]);
         return decrypted.toString();
     }
-}
+};

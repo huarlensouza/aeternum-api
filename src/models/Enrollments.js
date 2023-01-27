@@ -1,5 +1,5 @@
 import Database from "../lib/Database";
-import Discord, { EmbedBuilder } from 'discord.js'
+import Discord from 'discord.js';
 
 export default {
     get: async(id_championship) => {
@@ -157,7 +157,9 @@ export default {
                         return reject(err);
                     };
 
-                    await webhookClient.deleteMessage(enrollment[0].id_register);
+                    if(enrollment[0]?.id_register) {
+                        await webhookClient.deleteMessage(enrollment[0]?.id_register);
+                    };
 
                     Database.query(`
                         DELETE FROM enrollments
@@ -171,7 +173,6 @@ export default {
                         return resolve(true);
                     });
                 });
-                
             } catch(e) {
                 return reject(e);
             };

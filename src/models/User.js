@@ -1,4 +1,4 @@
-import Database from '../lib/Database'
+import Database from '../lib/Database';
 
 export default {
     isUser: async(id_discord, email) => {
@@ -35,7 +35,6 @@ export default {
     },
     setUser: async(data) => {
         return new Promise(async(resolve, reject) => {
-            console.log(data)
             try {
                 Database.query(`
                     INSERT INTO members (nickname, email, days, hours, id_discord, access_token, refresh_token, avatar)
