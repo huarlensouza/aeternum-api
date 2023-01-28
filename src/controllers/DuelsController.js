@@ -20,5 +20,14 @@ export default {
             console.log(e);
             return response.status(500).send({message: e});
         }
+    },
+    getLastDuelChampioship: async(request, response) => {
+        try {
+            const ranking = await Duels.getLastDuelChampionship();
+            return response.status(200).send(ranking);
+        } catch(e) {
+            console.log(e);
+            return response.status(500).send({message: e});
+        }
     }
 }

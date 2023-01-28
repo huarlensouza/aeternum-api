@@ -129,5 +129,38 @@ export default {
                 return reject(e);
             };
         });
+    },
+    getLastDuelChampionship: async() => {
+        return new Promise(async(resolve, reject) => {
+            try {
+                Database.query(`
+                    SELECT
+                        (SELECT description FROM championships WHERE id = duels.id_championship) AS description,
+                        (SELECT nickname FROM members WHERE id_discord = duels.id_discord) AS nickname,
+                        id_discord,
+                        (SELECT avatar FROM members WHERE id_discord = duels.id_discord) AS avatar,
+                        (SELECT weapon_primary FROM enrollments WHERE id_discord = duels.id_discord AND id_championship = duels.id_championship) AS weapon_primary,
+                        (SELECT weapon_secondary FROM enrollments WHERE id_discord = duels.id_discord AND id_championship = duels.id_championship) AS weapon_secondary,
+                        (SELECT nickname FROM members WHERE id_discord = duels.id_discord_opponent) AS opponent,
+                        id_discord_opponent,
+                        (SELECT avatar FROM members WHERE id_discord = duels.id_discord_opponent) AS avatar_opponent,
+                        (SELECT weapon_primary FROM enrollments WHERE id_discord = duels.id_discord_opponent AND id_championship = duels.id_championship) AS weapon_primary_opponent,
+                        (SELECT weapon_secondary FROM enrollments WHERE id_discord = duels.id_discord_opponent AND id_championship = duels.id_championship) AS weapon_secondary_opponent,
+                        link,
+                        (SELECT link FROM championships WHERE id = duels.id_championship) AS link_championship
+                    FROM duels
+                    WHERE round = '2' AND id_championship = (SELECT MAX(id) FROM championships WHERE active = 0) AND winner = 1
+                `, async(err, data) => {
+                    if (err) {
+                        console.log(err);
+                        return reject(err);
+                    };
+
+                    return resolve(data[0]);
+                });
+            } catch(e) {
+                return reject(e);
+            };
+        });
     }
 }
