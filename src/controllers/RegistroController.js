@@ -92,34 +92,36 @@ export default {
                 hours: `${new Date(championship.date).getHours()}:${('00'+new Date(championship.date).getMinutes()).slice(-2)}`
             }
 
-            const webhookClient = new Discord.WebhookClient({url:process.env.URL_DISCORD_WEBHOOK});
-            const embed = new EmbedBuilder()
-            .setAuthor({name:nickname, iconURL: `https://cdn.discordapp.com/avatars/${id_discord}/${avatar}`})
-            .setColor(0xEDA73E)
-            .addFields(
-                { name: `Campeonato - ${championship.description}`, value: `${infoChampionship.day} de ${infoChampionship.month} de ${infoChampionship.year} às ${infoChampionship.hours}` },
-                { name: 'Arma primária', value: weapon_primary, inline: true },
-                { name: 'Arma secundária', value: weapon_secondary, inline: true },
-            )
-            .setTimestamp()
-            
-            const message = await webhookClient.send({
-                username: `Competidor: `,
-                content: `<@${id_discord}>`,
-                embeds: [embed],
-            })
-
             const hasEnrollment = await Enrollments.hasEnrollment(id_discord);
             if(!hasEnrollment) {
+                const webhookClient = new Discord.WebhookClient({url:process.env.URL_DISCORD_WEBHOOK});
+                const embed = new EmbedBuilder()
+                .setAuthor({name:nickname, iconURL: `https://cdn.discordapp.com/avatars/${id_discord}/${avatar}`})
+                .setColor(0xEDA73E)
+                .addFields(
+                    { name: `Campeonato - ${championship.description}`, value: `${infoChampionship.day} de ${infoChampionship.month} de ${infoChampionship.year} às ${infoChampionship.hours}` },
+                    { name: 'Arma primária', value: weapon_primary, inline: true },
+                    { name: 'Arma secundária', value: weapon_secondary, inline: true },
+                )
+                .setTimestamp()
+                
+                const message = await webhookClient.send({
+                    username: `Competidor: `,
+                    content: `<@${id_discord}>`,
+                    embeds: [embed],
+                })
+
                 await Enrollments.setEnrollment({
                     id_discord: id_discord,
                     weapon_primary: weapon_primary,
                     weapon_secondary: weapon_secondary,
                     id_register: message.id
                 });
+
+                return response.status(200).send({enrollment:true});
             };
            
-            return response.status(200).send({enrollment:true});
+            return response.status(200).send({enrollment:false, message:'O usuário já está registrado no campeonato, confira sua inscrição na página inicial'});
         } catch(e) {
             console.log(e);
             return response.status(500).send({message: e});
